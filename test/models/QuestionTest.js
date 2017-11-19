@@ -34,38 +34,37 @@ describe('Question', () => {
     await resetDB()
   })
 
-  describe('as a class', () => {
-    describe('.CreateTable()', () => {
+  
+  describe('.CreateTable()', () => {
 
-      it('is a static class function', async () => {
-        expect(Question.CreateTable).to.be.a('function');
-      });
+    it('is a static class function', async () => {
+      expect(Question.CreateTable).to.be.a('function');
+    });
 
-      it("returns a promise", async function(){
-        const CreateTablePromise = Question.CreateTable()
+    it("returns a promise", async function(){
+      const CreateTablePromise = Question.CreateTable()
 
-        expect(CreateTablePromise).to.be.an.instanceOf(Promise);
-      })
+      expect(CreateTablePromise).to.be.an.instanceOf(Promise);
+    })
 
-      it("creates a new table in the database named 'questions'", async () => {
-        await Question.CreateTable();
+    it("creates a new table in the database named 'questions'", async () => {
+      await Question.CreateTable();
 
-        const table = await getTableInfo('questions')
+      const table = await getTableInfo('questions')
 
-        expect(table.name).to.eq('questions');
-      });
+      expect(table.name).to.eq('questions');
+    });
 
-      it("adds 'id' and 'content' columns to the 'questions' table", async () => {
-        await Question.CreateTable();
+    it("adds 'id' and 'content' columns to the 'questions' table", async () => {
+      await Question.CreateTable();
 
-        const { sql } = await getTableInfo('questions');
+      const { sql } = await getTableInfo('questions');
 
-        const idFieldExists = sql.indexOf('id INTEGER PRIMARY KEY') > -1;
-        const contentFieldExists = sql.indexOf('content TEXT') > -1;
+      const idFieldExists = sql.indexOf('id INTEGER PRIMARY KEY') > -1;
+      const contentFieldExists = sql.indexOf('content TEXT') > -1;
 
-        expect(idFieldExists, "'questions' table is missing an 'id' field with type 'INTEGER' and modifier 'PRIMARY KEY'").to.eq(true);
-        expect(contentFieldExists, "'questions' table is missing a 'content' field with type 'TEXT'").to.eq(true);
-      });
+      expect(idFieldExists, "'questions' table is missing an 'id' field with type 'INTEGER' and modifier 'PRIMARY KEY'").to.eq(true);
+      expect(contentFieldExists, "'questions' table is missing a 'content' field with type 'TEXT'").to.eq(true);
     });
   });
 
@@ -120,4 +119,39 @@ describe('Question', () => {
       expect(returnedQuestion).to.eql(question)
     })
   })
+
+  describe('.Find()', () => {
+    it('is a static class function', async () => {
+      expect(Question.Find).to.be.a('function');
+    });
+
+    it("returns a promise", async function(){
+      const question = new Question("Where in the World is Carmen Sandiego?")
+      await question.insert()
+
+      const FindPromise = Question.Find(1)
+
+      expect(FindPromise).to.be.an.instanceOf(Promise);
+    })
+
+    it('finds a Question in the database by its ID and returns a Question object', async function(){
+      const question = new Question("Where in the World is Carmen Sandiego?")
+      await question.insert()
+
+      const foundQuestion = await Question.Find(1);
+
+      expect(foundQuestion).to.be.an.instanceOf(Question)
+    });
+    
+    it('returns a Question object with the correct properties from the DB', async function(){
+      const question = new Question("Where in the World is Carmen Sandiego?")
+      await question.insert()
+
+      const foundQuestion = await Question.Find(1);
+
+      expect(foundQuestion.id).to.eql(1)
+      expect(foundQuestion.content).to.eql("Where in the World is Carmen Sandiego?")
+      expect(foundQuestion).to.eql(question)
+    });
+  });
 });
